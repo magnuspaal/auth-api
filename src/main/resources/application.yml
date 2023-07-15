@@ -1,0 +1,28 @@
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+spring:
+  datasource:
+    password: password
+    url: jdbc:postgresql://localhost:3213/user
+    username: magnus
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+application:
+  api:
+    url: ${API_URL}
+    allowed-origins: ${ALLOWED_ORIGINS}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    from: ${FROM_EMAIL}
+    password: ${FROM_PASSWORD}
+  jwt:
+    secret-key: ${SECRET_KEY}

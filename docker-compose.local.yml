@@ -1,0 +1,15 @@
+services:
+  postgres:
+    container_name: 'social_postgres'
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=user'
+      - 'POSTGRES_PASSWORD=password'
+      - 'POSTGRES_USER=magnus'
+    ports:
+      - '3213:5432'
+    volumes:
+      - 'social_postgres_data:/var/lib/postgresql/data:Z'
+
+volumes:
+  social_postgres_data: {}
