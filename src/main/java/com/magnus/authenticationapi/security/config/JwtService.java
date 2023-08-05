@@ -54,7 +54,6 @@ public class JwtService {
 
   public String generateRefreshToken(User user) {
     Date expiresAt = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 31 * 6);
-    System.out.println(expiresAt.toString());
     return generateToken(user, expiresAt);
   }
 

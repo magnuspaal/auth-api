@@ -1,6 +1,12 @@
 package com.magnus.authenticationapi.auth;
 
+import com.magnus.authenticationapi.auth.dto.AuthenticationRequest;
+import com.magnus.authenticationapi.auth.dto.AuthenticationResponse;
+import com.magnus.authenticationapi.auth.dto.RefreshTokenRequest;
+import com.magnus.authenticationapi.auth.dto.RegistrationRequest;
 import com.magnus.authenticationapi.config.ApiProperties;
+import com.magnus.authenticationapi.controllers.error.exceptions.EmailAlreadyTakenException;
+import com.magnus.authenticationapi.controllers.error.exceptions.UsernameAlreadyTakenException;
 import com.magnus.authenticationapi.email.EmailSender;
 import com.magnus.authenticationapi.token.TokenType;
 import com.magnus.authenticationapi.token.UserToken;
@@ -10,7 +16,6 @@ import com.magnus.authenticationapi.user.UserRepository;
 import com.magnus.authenticationapi.user.UserRole;
 import com.magnus.authenticationapi.security.config.JwtService;
 import com.magnus.authenticationapi.utils.DateUtils;
-import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,10 +25,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.UUID;
 
 @Service
@@ -41,22 +43,20 @@ public class AuthenticationService {
   @Autowired
   private final ApiProperties apiProperties;
 
-  private final Integer tokenExpiry = 1000 * 3; // 24 Hours
+  private final Integer tokenExpiry = 1000 * 60 * 5; // 5 minutes
 
-  public AuthenticationResponse register(RegistrationRequest request) {
-    boolean isValidEmail = emailValidator.test(request.getEmail());
-    if (!isValidEmail) {
-      throw new IllegalStateException("email not valid");
-    }
-    boolean userExists = userRepository.findByEmail(request.getEmail()).isPresent();
-    if (userExists) {
-      throw new IllegalStateException("Email already taken");
-    }
+  public AuthenticationResponse register(RegistrationRequest request) throws EmailAlreadyTakenException, UsernameAlreadyTakenException {
+    String email = request.getEmail().toLowerCase();
+    boolean emailExists = userRepository.findByEmail(email).isPresent();
+    boolean userExists = userRepository.findByUsername(request.getUsername()).isPresent();
+    if (emailExists) throw new EmailAlreadyTakenException();
+    if (userExists) throw new UsernameAlreadyTakenException();
+
     User user = new User(
         request.getFirstName(),
         request.getLastName(),
         request.getUsername(),
-        request.getEmail(),
+        email,
         request.getPassword(),
         UserRole.USER
     );
@@ -68,7 +68,7 @@ public class AuthenticationService {
     Date expiresAt = new Date(System.currentTimeMillis() + tokenExpiry);
     // Create jwt and refresh tokens
     String jwtToken = jwtService.generateToken(savedUser, expiresAt);
-    String refreshToken = this.generateAndSaveRefreshToken(user);
+    String refreshToken = this.generateAndSaveRefreshToken(savedUser);
 
     // Create and send confirmation token
     String confirmationToken = UUID.randomUUID().toString();
@@ -81,14 +81,16 @@ public class AuthenticationService {
   }
 
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    String email = request.getEmail().toLowerCase();
+
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
-            request.getEmail(),
+            email,
             request.getPassword()
         )
     );
 
-    User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+    User user = userRepository.findByEmail(email).orElseThrow();
     Date expiresAt = new Date(System.currentTimeMillis() + tokenExpiry);
     String jwtToken = jwtService.generateToken(user, expiresAt);
     String refreshToken = this.generateAndSaveRefreshToken(user);

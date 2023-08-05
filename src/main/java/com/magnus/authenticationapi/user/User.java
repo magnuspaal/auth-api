@@ -33,12 +33,15 @@ public class User implements UserDetails {
     private Long id;
     private String firstName;
     private String lastName;
+    @Column(unique=true)
     private String username;
+    @Column(unique=true)
     private String email;
     private String password;
+    private String imageUrl;
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
-    @OneToMany(mappedBy="user")
+    @OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
     private List<UserToken> tokens;
     private boolean enabled = false;
 
