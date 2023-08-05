@@ -21,6 +21,7 @@ application:
   api:
     url: ${API_URL}
     allowed-origins: ${ALLOWED_ORIGINS}
+    file-server-url: ${FILE_SERVER_URL}
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
