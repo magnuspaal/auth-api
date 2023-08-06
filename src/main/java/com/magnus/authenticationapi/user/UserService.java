@@ -13,7 +13,11 @@ public class UserService implements UserDetailsService {
 
     private final static String USER_NOT_FOUND_MESSAGE = "user with email %s not found";
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("user not found"));
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

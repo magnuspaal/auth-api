@@ -1,5 +1,6 @@
 package com.magnus.authenticationapi.controllers.error;
 
+import com.magnus.authenticationapi.controllers.dto.BaseResponse;
 import lombok.*;
 
 import java.util.ArrayList;

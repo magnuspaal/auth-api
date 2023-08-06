@@ -1,5 +1,6 @@
 package com.magnus.authenticationapi.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.magnus.authenticationapi.token.UserToken;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -37,10 +38,12 @@ public class User implements UserDetails {
     private String username;
     @Column(unique=true)
     private String email;
+    @JsonIgnore
     private String password;
-    private String imageUrl;
+    private String imageName;
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
+    @JsonIgnore
     @OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
     private List<UserToken> tokens;
     private boolean enabled = false;

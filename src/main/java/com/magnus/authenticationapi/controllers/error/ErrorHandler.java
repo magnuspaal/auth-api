@@ -1,5 +1,6 @@
 package com.magnus.authenticationapi.controllers.error;
 
+import com.magnus.authenticationapi.controllers.dto.BaseResponse;
 import com.magnus.authenticationapi.controllers.error.exceptions.EmailAlreadyTakenException;
 import com.magnus.authenticationapi.controllers.error.exceptions.UsernameAlreadyTakenException;
 import org.springframework.http.HttpStatus;

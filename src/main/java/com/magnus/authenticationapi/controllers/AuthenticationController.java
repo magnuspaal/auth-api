@@ -4,7 +4,7 @@ import com.magnus.authenticationapi.auth.*;
 import com.magnus.authenticationapi.auth.dto.AuthenticationRequest;
 import com.magnus.authenticationapi.auth.dto.RefreshTokenRequest;
 import com.magnus.authenticationapi.auth.dto.RegistrationRequest;
-import com.magnus.authenticationapi.controllers.error.BaseResponse;
+import com.magnus.authenticationapi.controllers.dto.BaseResponse;
 import com.magnus.authenticationapi.controllers.error.exceptions.EmailAlreadyTakenException;
 import com.magnus.authenticationapi.controllers.error.exceptions.UsernameAlreadyTakenException;
 import jakarta.validation.Valid;

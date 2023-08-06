@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,6 +45,10 @@ public class AuthenticationService {
   private final ApiProperties apiProperties;
 
   private final Integer tokenExpiry = 1000 * 60 * 5; // 5 minutes
+
+  public User getAuthenticatedUser() {
+    return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+  }
 
   public AuthenticationResponse register(RegistrationRequest request) throws EmailAlreadyTakenException, UsernameAlreadyTakenException {
     String email = request.getEmail().toLowerCase();
