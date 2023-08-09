@@ -141,7 +141,6 @@ public class AuthenticationService {
 
   private void invalidateRefreshToken(User user, String token) {
     UserToken userToken = userTokenRepository.findByUserAndValidAndToken(user, true, token).orElse(null);
-    System.out.println(userToken);
     if (userToken != null) {
       userTokenRepository.delete(userToken);
     }
