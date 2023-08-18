@@ -9,10 +9,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @SpringBootApplication
 @EnableConfigurationProperties({JwtProperties.class, ApiProperties.class, MailProperties.class})
-public class SignOnServiceApplication {
+public class AuthApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SignOnServiceApplication.class, args);
+		SpringApplication.run(AuthApiApplication.class, args);
 	}
 
 }

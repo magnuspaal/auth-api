@@ -4,9 +4,9 @@ server:
     include-binding-errors: always
 spring:
   datasource:
-    password: password
-    url: jdbc:postgresql://localhost:3213/user
-    username: magnus
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
   jpa:
     hibernate:
       ddl-auto: update

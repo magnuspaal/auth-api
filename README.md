@@ -8,5 +8,12 @@ This is an authentication api based on JWT tokens. Features:
 
 #### Environment arguments
 ```agsl
-JWT_SECRET=
+ALLOWED_ORIGINS=http://localhost:3000,http://192.168.10.225:3000
+API_URL=http://192.168.10.225:8080
+FROM_EMAIL=
+FROM_PASSWORD=
+MAIL_HOST=
+MAIL_PORT=
+SECRET_KEY=
+FILE_SERVER_URL=http://localhost:8082
 ```
