@@ -17,3 +17,7 @@ MAIL_PORT=
 SECRET_KEY=
 FILE_SERVER_URL=http://localhost:8082
 ```
+
+#### Release
+* Run `./cicd/deploy/bump <version>`
+* Push new commit and tag. GitHub Actions will deploy the container.
