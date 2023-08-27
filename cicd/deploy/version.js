@@ -4,7 +4,7 @@ const compose = './cicd/deploy/docker-compose.yml';
 const pom = './pom.xml'
 const newVersion = process.argv[2]
 
-bumpVersion(compose, /^(\s+image.*auth-api:)(.+)$/m, newVersion);
+bumpVersion(compose, /^(\s+image.*other:auth-api-)(.+)$/m, newVersion);
 bumpVersion(pom, /^(\s+<artifactId>auth-api<\/artifactId>\n\s+<version>)(.+?(?=<\/version>))/m, newVersion);
 
 function bumpVersion(file, regexp, version) {
