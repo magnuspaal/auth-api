@@ -66,8 +66,13 @@ public class AuthenticationService {
         UserRole.USER
     );
 
+    return register(user);
+  }
+
+  public AuthenticationResponse register(User user) {
     String encodedPassword = passwordEncoder.encode(user.getPassword());
     user.setPassword(encodedPassword);
+
     User savedUser = userRepository.save(user);
 
     Date expiresAt = new Date(System.currentTimeMillis() + tokenExpiry);
@@ -95,6 +100,10 @@ public class AuthenticationService {
         )
     );
 
+    return generateTokens(email);
+  }
+
+  public AuthenticationResponse generateTokens(String email) {
     User user = userRepository.findByEmail(email).orElseThrow();
     Date expiresAt = new Date(System.currentTimeMillis() + tokenExpiry);
     String jwtToken = jwtService.generateToken(user, expiresAt);
@@ -114,8 +123,8 @@ public class AuthenticationService {
       if (userToken != null && userToken.isValid()) {
         Date expiresAt = new Date(System.currentTimeMillis() + tokenExpiry);
         String jwtToken = jwtService.generateToken(userToken.getUser(), expiresAt);
-        String newRefreshToken = this.generateAndSaveRefreshToken(userToken.getUser());
         invalidateRefreshToken(userToken.getUser(), userToken.getToken());
+        String newRefreshToken = this.generateAndSaveRefreshToken(userToken.getUser());
         return AuthenticationResponse.builder().token(jwtToken).refreshToken(newRefreshToken).expiresAt(DateUtils.getDateISO8601GMTString(expiresAt)).build();
       }
     }
@@ -140,9 +149,6 @@ public class AuthenticationService {
   }
 
   private void invalidateRefreshToken(User user, String token) {
-    UserToken userToken = userTokenRepository.findByUserAndValidAndToken(user, true, token).orElse(null);
-    if (userToken != null) {
-      userTokenRepository.delete(userToken);
-    }
+    userTokenRepository.findByUserAndValidAndToken(user, true, token).ifPresent(userTokenRepository::delete);
   }
 }
