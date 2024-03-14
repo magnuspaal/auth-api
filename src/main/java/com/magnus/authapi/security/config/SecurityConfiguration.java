@@ -46,6 +46,7 @@ public class SecurityConfiguration {
         configuration.setAllowedMethods(List.of("POST", "GET", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("X-Api-Key", "Content-Type"));
         configuration.setExposedHeaders(List.of("X-Api-Key", "Content-Type"));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
