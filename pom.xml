@@ -102,6 +102,46 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>4.24.0</version>
+				<configuration>
+					<changeLogFile>src/main/resources/db/master.xml</changeLogFile>
+					<outputChangeLogFile>${project.basedir}/src/main/resources/db/master.xml</outputChangeLogFile>
+					<diffChangeLogFile>
+						${project.basedir}/src/main/resources/db/changelog/${maven.build.timestamp}_changelog.xml
+					</diffChangeLogFile>
+					<defaultSchemaName/>
+					<propertyFile>src/main/resources/liquibase.properties</propertyFile>
+					<logging>debug</logging>
+					<driver>org.postgresql.Driver</driver>
+					<verbose>true</verbose>
+				</configuration>
+
+				<dependencies>
+					<dependency>
+						<groupId>org.liquibase</groupId>
+						<artifactId>liquibase-core</artifactId>
+						<version>4.24.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.liquibase.ext</groupId>
+						<artifactId>liquibase-hibernate6</artifactId>
+						<version>4.24.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-starter-data-jpa</artifactId>
+						<version>3.1.1</version>
+					</dependency>
+					<dependency>
+						<groupId>jakarta.validation</groupId>
+						<artifactId>jakarta.validation-api</artifactId>
+						<version>3.0.2</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 		</plugins>
 	</build>
 
