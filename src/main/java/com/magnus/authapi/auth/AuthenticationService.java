@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,7 +33,6 @@ import java.util.UUID;
 public class AuthenticationService {
 
   private final AuthenticationManager authenticationManager;
-  private final EmailValidator emailValidator;
   private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
   private final UserTokenRepository userTokenRepository;
@@ -45,10 +43,6 @@ public class AuthenticationService {
   private final ApiProperties apiProperties;
 
   private final Integer tokenExpiry = 1000 * 60 * 5; // 5 minutes
-
-  public User getAuthenticatedUser() {
-    return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-  }
 
   public AuthenticationResponse register(RegistrationRequest request) throws EmailAlreadyTakenException, UsernameAlreadyTakenException {
     String email = request.getEmail().toLowerCase();
@@ -103,27 +97,31 @@ public class AuthenticationService {
     return generateTokens(email);
   }
 
-  public AuthenticationResponse generateTokens(String email) {
+  private AuthenticationResponse generateTokens(String email) {
     User user = userRepository.findByEmail(email).orElseThrow();
     Date expiresAt = new Date(System.currentTimeMillis() + tokenExpiry);
     String jwtToken = jwtService.generateToken(user, expiresAt);
     String refreshToken = this.generateAndSaveRefreshToken(user);
-    return AuthenticationResponse.builder().token(jwtToken).refreshToken(refreshToken).expiresAt(DateUtils.getDateISO8601GMTString(expiresAt)).build();
+    return AuthenticationResponse.builder()
+        .token(jwtToken)
+        .refreshToken(refreshToken)
+        .expiresAt(DateUtils.getDateISO8601GMTString(expiresAt))
+        .build();
   }
 
   public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
 
     String refreshToken = request.getRefreshToken();
     String userEmail = jwtService.extractUsername(refreshToken);
+    User user = userRepository.findByEmail(userEmail).orElseThrow();
     UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
     if (jwtService.isTokenValid(refreshToken, userDetails)) {
-      UserToken userToken = userTokenRepository.findByToken(refreshToken)
-          .orElse(null);
+      UserToken userToken = userTokenRepository.findByUserAndValidAndToken(user, true, refreshToken).orElse(null);
       if (userToken != null && userToken.isValid()) {
         Date expiresAt = new Date(System.currentTimeMillis() + tokenExpiry);
-        String jwtToken = jwtService.generateToken(userToken.getUser(), expiresAt);
         invalidateRefreshToken(userToken.getUser(), userToken.getToken());
+        String jwtToken = jwtService.generateToken(userToken.getUser(), expiresAt);
         String newRefreshToken = this.generateAndSaveRefreshToken(userToken.getUser());
         return AuthenticationResponse.builder().token(jwtToken).refreshToken(newRefreshToken).expiresAt(DateUtils.getDateISO8601GMTString(expiresAt)).build();
       }
@@ -144,6 +142,7 @@ public class AuthenticationService {
 
   private String generateAndSaveRefreshToken(User user) {
     String refreshToken = jwtService.generateRefreshToken(user);
+    invalidateRefreshToken(user, refreshToken);
     userTokenRepository.save(new UserToken(user, TokenType.REFRESH_TOKEN, refreshToken));
     return refreshToken;
   }
