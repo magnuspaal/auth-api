@@ -4,9 +4,10 @@ import com.magnus.authapi.auth.dto.AuthenticationRequest;
 import com.magnus.authapi.auth.dto.AuthenticationResponse;
 import com.magnus.authapi.auth.dto.RefreshTokenRequest;
 import com.magnus.authapi.auth.dto.RegistrationRequest;
+import com.magnus.authapi.controllers.exception.exceptions.InvalidRefreshTokenException;
 import com.magnus.authapi.config.ApiProperties;
-import com.magnus.authapi.controllers.error.exceptions.EmailAlreadyTakenException;
-import com.magnus.authapi.controllers.error.exceptions.UsernameAlreadyTakenException;
+import com.magnus.authapi.controllers.exception.exceptions.EmailAlreadyTakenException;
+import com.magnus.authapi.controllers.exception.exceptions.UsernameAlreadyTakenException;
 import com.magnus.authapi.email.EmailSender;
 import com.magnus.authapi.token.TokenType;
 import com.magnus.authapi.token.UserToken;
@@ -109,7 +110,7 @@ public class AuthenticationService {
         .build();
   }
 
-  public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
+  public AuthenticationResponse refreshToken(RefreshTokenRequest request) throws InvalidRefreshTokenException {
 
     String refreshToken = request.getRefreshToken();
     String userEmail = jwtService.extractUsername(refreshToken);
@@ -126,7 +127,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().token(jwtToken).refreshToken(newRefreshToken).expiresAt(DateUtils.getDateISO8601GMTString(expiresAt)).build();
       }
     }
-    throw new IllegalStateException("invalid refresh token");
+    throw new InvalidRefreshTokenException();
   }
 
   public void confirmUser(String token) {

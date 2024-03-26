@@ -4,9 +4,10 @@ import com.magnus.authapi.auth.*;
 import com.magnus.authapi.auth.dto.AuthenticationRequest;
 import com.magnus.authapi.auth.dto.RefreshTokenRequest;
 import com.magnus.authapi.auth.dto.RegistrationRequest;
+import com.magnus.authapi.controllers.exception.exceptions.InvalidRefreshTokenException;
 import com.magnus.authapi.controllers.dto.BaseResponse;
-import com.magnus.authapi.controllers.error.exceptions.EmailAlreadyTakenException;
-import com.magnus.authapi.controllers.error.exceptions.UsernameAlreadyTakenException;
+import com.magnus.authapi.controllers.exception.exceptions.EmailAlreadyTakenException;
+import com.magnus.authapi.controllers.exception.exceptions.UsernameAlreadyTakenException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class AuthenticationController {
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<BaseResponse> refresh(@RequestBody RefreshTokenRequest request) {
+  public ResponseEntity<BaseResponse> refresh(@RequestBody RefreshTokenRequest request) throws InvalidRefreshTokenException {
     return ResponseEntity.ok(service.refreshToken(request));
   }
 

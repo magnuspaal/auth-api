@@ -1,6 +1,6 @@
 package com.magnus.authapi.auth.dto;
 
-import com.magnus.authapi.controllers.error.ApiErrorCode;
+import com.magnus.authapi.controllers.exception.ApiExceptionCode;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthenticationRequest {
 
-  @NotNull(message = ApiErrorCode.EMAIL_NULL)
-  @Email(message = ApiErrorCode.INVALID_EMAIL)
+  @NotNull(message = ApiExceptionCode.EMAIL_NULL)
+  @Email(message = ApiExceptionCode.INVALID_EMAIL)
   private String email;
   String password;
 }

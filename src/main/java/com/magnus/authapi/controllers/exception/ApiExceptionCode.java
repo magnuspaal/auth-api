@@ -1,6 +1,6 @@
-package com.magnus.authapi.controllers.error;
+package com.magnus.authapi.controllers.exception;
 
-public class ApiErrorCode {
+public class ApiExceptionCode {
 
   // ** REGISTRATION ** //
   public final static String EMAIL_NULL = "email_null";
@@ -19,4 +19,5 @@ public class ApiErrorCode {
   public final static String PASSWORD_TOO_LONG = "password_too_long";
   public static final String EMAIL_ALREADY_TAKEN = "email_already_taken";
   public static final String USERNAME_ALREADY_TAKEN = "username_already_taken";
+  public static final String INVALID_REFRESH_TOKEN = "invalid_refresh_token";
 }

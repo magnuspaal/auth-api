@@ -1,4 +1,4 @@
-package com.magnus.authapi.controllers.error;
+package com.magnus.authapi.controllers.exception;
 
 import com.magnus.authapi.controllers.dto.BaseResponse;
 import lombok.*;
@@ -9,6 +9,6 @@ import java.util.ArrayList;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class ApiErrorResponse extends BaseResponse {
+public class ApiExceptionResponse extends BaseResponse {
   private ArrayList<String> codes;
 }
