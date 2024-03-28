@@ -57,12 +57,12 @@ public class User implements UserDetails {
         this.userRole = userRole;
     }
 
-    public User(String username, String email) {
-        this.firstName = "";
-        this.lastName = "";
+    public User(Long id, String firstName, String lastName, String username, String email) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.username = username;
         this.email = email;
-        this.password = null;
         this.userRole = UserRole.USER;
     }
 

@@ -7,20 +7,23 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-  @Autowired
-  private JwtProperties jwtProperties;
+  private final JwtProperties jwtProperties;
 
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -33,11 +36,11 @@ public class JwtService {
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    return (username.equals(userDetails.getUsername())) && isTokenValid(token);
   }
 
-  private boolean isTokenExpired(String token) {
-    return extractExpiration(token).before(new Date(System.currentTimeMillis()));
+  public boolean isTokenValid(String token) {
+    return extractExpiration(token).after(new Date(System.currentTimeMillis()));
   }
 
   private Date extractExpiration(String token) {
@@ -70,7 +73,7 @@ public class JwtService {
         .setExpiration(expiresAt)
         .signWith(getSigningKey(), SignatureAlgorithm.HS256)
         .compact();
-  };
+  }
 
   private Key getSigningKey() {
     byte[] keyBytes = Decoders.BASE64.decode(this.getSecretKey());
@@ -79,5 +82,27 @@ public class JwtService {
 
   private String getSecretKey() {
     return jwtProperties.getSecretKey();
+  }
+
+  public UsernamePasswordAuthenticationToken validateJWT(String jwt) {
+
+    if (this.isTokenValid(jwt)) {
+      Claims claims = this.extractAllClaims(jwt);
+
+      User user = new User(
+          claims.get("id", Long.class),
+          claims.get("first_name", String.class),
+          claims.get("last_name", String.class),
+          claims.getSubject(),
+          claims.get("username", String.class)
+      );
+
+      return new UsernamePasswordAuthenticationToken(
+          user,
+          null,
+          Collections.singleton((GrantedAuthority) () -> "USER")
+      );
+    }
+    return null;
   }
 }
