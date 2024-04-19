@@ -48,7 +48,7 @@ public class AuthenticationService {
   @Autowired
   private final ApiProperties apiProperties;
 
-  private final Integer tokenExpiry = 1000 * 20; // 5 minutes
+  private final Integer tokenExpiry = 1000 * 60 * 5; // 5 minutes
 
   public AuthenticationResponse register(RegistrationRequest request) throws EmailAlreadyTakenException, UsernameAlreadyTakenException {
     String email = request.getEmail().toLowerCase();
