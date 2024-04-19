@@ -17,6 +17,9 @@ spring:
     show-sql: false
   liquibase:
     change-log: classpath:db/master.xml
+  output:
+    ansi:
+      enabled: ALWAYS
 application:
   api:
     url: ${API_URL}
