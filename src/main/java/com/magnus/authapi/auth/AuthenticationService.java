@@ -202,7 +202,7 @@ public class AuthenticationService {
     cookie.setHttpOnly(httpOnly);
     cookie.setMaxAge(maxAge);
 
-    cookie.setSecure(profileName.isProduction() && !httpOnly);
+    cookie.setSecure(profileName.isProduction());
     if (profileName.isProduction()) {
       cookie.setDomain(apiProperties.getCookieDomain());
     }
