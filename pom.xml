@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.magnus</groupId>
 	<artifactId>auth-api</artifactId>
-	<version>0.2.3</version>
+	<version>0.2.4</version>
 	<name>auth-api</name>
 	<description>Sign on service for my applications</description>
 	<properties>
