@@ -2,8 +2,8 @@ package com.magnus.authapi.auth;
 
 import com.magnus.authapi.auth.dto.AuthenticationRequest;
 import com.magnus.authapi.auth.dto.AuthenticationResponse;
-import com.magnus.authapi.auth.dto.RefreshTokenRequest;
 import com.magnus.authapi.auth.dto.RegistrationRequest;
+import com.magnus.authapi.config.ProfileName;
 import com.magnus.authapi.controllers.exception.exceptions.InvalidRefreshTokenException;
 import com.magnus.authapi.config.ApiProperties;
 import com.magnus.authapi.controllers.exception.exceptions.EmailAlreadyTakenException;
@@ -17,6 +17,8 @@ import com.magnus.authapi.user.UserRepository;
 import com.magnus.authapi.user.UserRole;
 import com.magnus.authapi.security.config.JwtService;
 import com.magnus.authapi.utils.DateUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,7 @@ public class AuthenticationService {
   private final EmailSender emailSender;
   @Autowired
   private final ApiProperties apiProperties;
+  private final ProfileName profileName;
 
   private final Integer tokenExpiry = 1000 * 60 * 5; // 5 minutes
 
@@ -90,7 +93,7 @@ public class AuthenticationService {
     return AuthenticationResponse.builder().token(jwtToken).refreshToken(refreshToken).expiresAt(DateUtils.getDateISO8601GMTString(expiresAt)).build();
   }
 
-  public AuthenticationResponse authenticate(AuthenticationRequest request) {
+  public void authenticate(AuthenticationRequest request, HttpServletResponse response) {
     String email = request.getEmail().toLowerCase();
 
     authenticationManager.authenticate(
@@ -100,7 +103,11 @@ public class AuthenticationService {
         )
     );
 
-    return generateTokens(email);
+    AuthenticationResponse authenticationResponse = generateTokens(email);
+
+    response.addCookie(generateCookie("authToken", authenticationResponse.getToken(), tokenExpiry / 1000, false));
+    response.addCookie(generateCookie("refreshToken", authenticationResponse.getRefreshToken(), 60 * 60 * 24 * 31 * 6, true));
+    response.addCookie(generateCookie("expiresAt", authenticationResponse.getExpiresAt(), 60 * 60 * 24 * 31 * 6, false));
   }
 
   private AuthenticationResponse generateTokens(String email) {
@@ -115,8 +122,7 @@ public class AuthenticationService {
         .build();
   }
 
-  public synchronized AuthenticationResponse refreshToken(RefreshTokenRequest request) throws InvalidRefreshTokenException {
-    String refreshToken = request.getRefreshToken();
+  public synchronized void refreshToken(String refreshToken, HttpServletResponse response) throws InvalidRefreshTokenException {
     String userEmail = jwtService.extractUsername(refreshToken);
     User user = userRepository.findByEmail(userEmail).orElseThrow();
     UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
@@ -127,19 +133,24 @@ public class AuthenticationService {
       UserToken userToken = userTokenRepository.findByUserAndValidAndToken(user, true, refreshToken).orElse(null);
 
       if (dbRefreshTokenIsValid(userToken)) {
-        logger.info("\u001B[32muser token from db\u001B[0m [ " + userEmail + " ], [ " + userToken.getToken() + " ]");
+        logger.info("\u001B[32muser token from db\u001B[0m [ " + userEmail + " ], [ " + userToken.getToken().substring(userToken.getToken().length() - 10) + " ]");
 
         Date expiresAt = new Date(System.currentTimeMillis() + tokenExpiry);
         invalidateRefreshToken(userToken.getUser(), userToken.getToken());
         String jwtToken = jwtService.generateToken(userToken.getUser(), expiresAt);
         String newRefreshToken = this.generateAndSaveRefreshToken(userToken.getUser());
 
-        logger.info("\u001B[32mreturn refresh token\u001B[0m [ " + userEmail + " ], [ " + newRefreshToken + " ]");
-        return AuthenticationResponse.builder().token(jwtToken).refreshToken(newRefreshToken).expiresAt(DateUtils.getDateISO8601GMTString(expiresAt)).build();
+        logger.info("\u001B[32mreturn refresh token\u001B[0m [ " + userEmail + " ], [ " + newRefreshToken.substring(newRefreshToken.length() - 10) + " ]");
+
+        response.addCookie(generateCookie("authToken", jwtToken, tokenExpiry / 1000, false));
+        response.addCookie(generateCookie("refreshToken", newRefreshToken, 60 * 60 * 24 * 31 * 6, true));
+        response.addCookie(generateCookie("expiresAt", DateUtils.getDateISO8601GMTString(expiresAt), 60 * 60 * 24 * 31 * 6, false));
+
+        return;
       }
     }
 
-    logger.info("\u001B[31minvalid refresh token\u001B[0m [ " + userEmail + " ], [ " + refreshToken + " ]");
+    logger.info("\u001B[31minvalid refresh token\u001B[0m [ " + userEmail + " ], [ " + refreshToken.substring(refreshToken.length() - 10) + " ]");
     throw new InvalidRefreshTokenException();
   }
 
@@ -182,5 +193,19 @@ public class AuthenticationService {
 
   private void deleteRefreshToken(User user, String token) {
     userTokenRepository.findByUserAndValidAndToken(user, true, token).ifPresent(userTokenRepository::delete);
+  }
+
+  private Cookie generateCookie(String cookieName, String cookieValue, int maxAge, boolean httpOnly) {
+    Cookie cookie = new Cookie(cookieName, cookieValue);
+
+    cookie.setPath("/");
+    cookie.setHttpOnly(httpOnly);
+    cookie.setMaxAge(maxAge);
+
+    cookie.setSecure(profileName.isProduction() && !httpOnly);
+    if (profileName.isProduction()) {
+      cookie.setDomain(apiProperties.getCookieDomain());
+    }
+    return cookie;
   }
 }

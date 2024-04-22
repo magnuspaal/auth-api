@@ -3,6 +3,8 @@ server:
     include-message: always
     include-binding-errors: always
 spring:
+  profiles:
+    active: ${PROFILE}
   datasource:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}

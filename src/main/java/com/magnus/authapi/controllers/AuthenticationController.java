@@ -2,12 +2,12 @@ package com.magnus.authapi.controllers;
 
 import com.magnus.authapi.auth.*;
 import com.magnus.authapi.auth.dto.AuthenticationRequest;
-import com.magnus.authapi.auth.dto.RefreshTokenRequest;
 import com.magnus.authapi.auth.dto.RegistrationRequest;
 import com.magnus.authapi.controllers.exception.exceptions.InvalidRefreshTokenException;
 import com.magnus.authapi.controllers.dto.BaseResponse;
 import com.magnus.authapi.controllers.exception.exceptions.EmailAlreadyTakenException;
 import com.magnus.authapi.controllers.exception.exceptions.UsernameAlreadyTakenException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +25,15 @@ public class AuthenticationController {
   }
 
   @PostMapping("/authenticate")
-  public ResponseEntity<BaseResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
-    return ResponseEntity.ok(service.authenticate(request));
+  public ResponseEntity<BaseResponse> authenticate(@RequestBody @Valid AuthenticationRequest request, HttpServletResponse response) {
+    service.authenticate(request, response);
+    return ResponseEntity.ok().build();
   }
 
-  @PostMapping("/refresh")
-  public ResponseEntity<BaseResponse> refresh(@RequestBody RefreshTokenRequest request) throws InvalidRefreshTokenException {
-    return ResponseEntity.ok(service.refreshToken(request));
+  @GetMapping("/refresh")
+  public ResponseEntity<BaseResponse> refresh(@CookieValue("refreshToken") String refreshToken, HttpServletResponse response) throws InvalidRefreshTokenException {
+    service.refreshToken(refreshToken, response);
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping("/confirm/{token}")
