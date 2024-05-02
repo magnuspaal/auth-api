@@ -1,6 +1,5 @@
-package com.magnus.authapi.auth.dto;
+package com.magnus.authapi.controllers.dto;
 
-import com.magnus.authapi.controllers.dto.BaseResponse;
 import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)

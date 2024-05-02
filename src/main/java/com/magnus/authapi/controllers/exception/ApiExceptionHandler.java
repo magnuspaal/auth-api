@@ -4,7 +4,6 @@ import com.magnus.authapi.controllers.dto.BaseResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -13,15 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice
-public class ErrorHandler {
+public class ApiExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public static ResponseEntity<BaseResponse> handleErrors(Errors errors) {
+  public static ResponseEntity<BaseResponse> handleMethodArgumentNotValidException(HttpServletRequest req, MethodArgumentNotValidException ex) {
+    List<ObjectError> allErrors = ex.getBindingResult().getAllErrors();
     ArrayList<String> codes = new ArrayList<>();
-    for (ObjectError error: errors.getAllErrors()) {
+    for( ObjectError error : allErrors ) {
       codes.add(error.getDefaultMessage());
     }
-    return new ResponseEntity<>(new ApiExceptionResponse(codes), HttpStatus.BAD_REQUEST);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiExceptionResponse(codes));
   }
 
   @ExceptionHandler(ApiException.class)

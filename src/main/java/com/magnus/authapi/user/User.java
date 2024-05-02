@@ -57,13 +57,13 @@ public class User implements UserDetails {
         this.userRole = userRole;
     }
 
-    public User(Long id, String firstName, String lastName, String username, String email) {
+    public User(Long id, String firstName, String lastName, String email, String username) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
         this.email = email;
-        this.userRole = UserRole.USER;
+        this.userRole = UserRole.ROLE_USER;
     }
 
     @Override

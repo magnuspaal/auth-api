@@ -1,7 +1,7 @@
 package com.magnus.authapi.auth;
 
 import com.magnus.authapi.auth.dto.AuthenticationRequest;
-import com.magnus.authapi.auth.dto.AuthenticationResponse;
+import com.magnus.authapi.controllers.dto.AuthenticationResponse;
 import com.magnus.authapi.auth.dto.RegistrationRequest;
 import com.magnus.authapi.config.ProfileName;
 import com.magnus.authapi.controllers.exception.exceptions.InvalidRefreshTokenException;
@@ -66,7 +66,7 @@ public class AuthenticationService {
         request.getUsername(),
         email,
         request.getPassword(),
-        UserRole.USER
+        UserRole.ROLE_USER
     );
 
     return register(user);
@@ -96,6 +96,8 @@ public class AuthenticationService {
   public void authenticate(AuthenticationRequest request, HttpServletResponse response) {
     String email = request.getEmail().toLowerCase();
 
+    logger.info( "\u001B[32muser authentication\u001B[0m [ " + email + " ]");
+
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
             email,
@@ -104,6 +106,8 @@ public class AuthenticationService {
     );
 
     AuthenticationResponse authenticationResponse = generateTokens(email);
+
+    logger.info( "\u001B[32mtokens generated\u001B[0m, expiresAt: [ " + authenticationResponse.getExpiresAt() + " ]");
 
     response.addCookie(generateCookie("authToken", authenticationResponse.getToken(), tokenExpiry / 1000, false));
     response.addCookie(generateCookie("refreshToken", authenticationResponse.getRefreshToken(), 60 * 60 * 24 * 31 * 6, true));

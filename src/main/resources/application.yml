@@ -1,7 +1,11 @@
 server:
+  port: ${PORT}
+  max-http-request-header-size: 20000
   error:
     include-message: always
     include-binding-errors: always
+  servlet:
+    context-path: /api/v1
 spring:
   profiles:
     active: ${PROFILE}

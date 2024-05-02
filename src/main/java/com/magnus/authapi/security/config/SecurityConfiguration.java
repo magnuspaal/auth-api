@@ -4,6 +4,7 @@ import com.magnus.authapi.config.ApiProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,7 +33,9 @@ public class SecurityConfiguration {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/auth/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/auth/**").permitAll()
                     .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -45,9 +48,9 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(apiProperties.getAllowedOrigins());
-        configuration.setAllowedMethods(List.of("POST", "GET", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("X-Api-Key", "Content-Type"));
-        configuration.setExposedHeaders(List.of("X-Api-Key", "Content-Type"));
+        configuration.setAllowedMethods(List.of("POST", "GET", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+        configuration.setExposedHeaders(List.of("Content-Type", "Authorization"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

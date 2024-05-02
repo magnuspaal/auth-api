@@ -8,11 +8,11 @@ RUN mvn -f /app/pom.xml clean
 RUN mvn -f /app/pom.xml install
 RUN mvn -f /app/pom.xml package
 
-FROM openjdk:17-alpine
+FROM openjdk:17-alpine AS runner
 ARG APP_VERSION
 
 COPY --from=builder /app/target/auth-api-${APP_VERSION}.jar /usr/local/lib/auth-api.jar
 
-EXPOSE 8080
+EXPOSE 8069
 
 ENTRYPOINT java -jar /usr/local/lib/auth-api.jar

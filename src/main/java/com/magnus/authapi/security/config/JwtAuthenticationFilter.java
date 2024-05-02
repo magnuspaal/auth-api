@@ -24,6 +24,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Override
   public void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
       throws IOException, ServletException {
+
+    logger.info( "\u001B[32mjwt authentication\u001B[0m");
+
     final String authHeader = request.getHeader("Authorization");
     Cookie cookie = null;
 
